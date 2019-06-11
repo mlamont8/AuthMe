@@ -1,6 +1,7 @@
 const Joi = require("@hapi/joi");
 const UserModel = require("./userModel");
 const Boom = require("@hapi/boom");
+const bcrypt = require("bcrypt");
 
 exports.configureRoutes = server => {
   return server.route([
@@ -41,6 +42,10 @@ exports.configureRoutes = server => {
           throw Boom.conflict("User Already Registered");
         } else {
           try {
+            request.payload.password = await bcrypt.hash(
+              request.payload.password,
+              10
+            );
             let user = new UserModel(request.payload);
             let result = await user.save();
             return h.response(result);
